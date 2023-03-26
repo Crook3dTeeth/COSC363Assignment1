@@ -15,12 +15,8 @@ using namespace std;
 
 // Camera Position data
 int cam_hgt = 10;
-int cam_x = 0;
-int cam_z = 0;
-int cam_look_x = 0;
-int cam_look_z = 0;
-int cam_look_y = 0;
 float theta = 0;
+
 
 // Mesh file data
 float* x, * y, * z;					//vertex coordinates
@@ -36,22 +32,23 @@ void special(int key, int x, int y)
 	switch (key) {
 	case GLUT_KEY_UP:
 		// move camera forward
-		cam_x+= 0.1;
+
 		glutPostRedisplay();
 		break;
 	case GLUT_KEY_DOWN:
 		// move camera back
-		cam_x-= 0.1;
+
+
 		glutPostRedisplay();
 		break;
 	case GLUT_KEY_LEFT:
 		//cam left
-		theta--;
+		theta -= 2;
 		glutPostRedisplay();
 		break;
 	case GLUT_KEY_RIGHT:
 		// cam right
-		theta++;
+		theta += 2;
 		glutPostRedisplay();
 		break;
 	case GLUT_KEY_PAGE_UP:
@@ -116,11 +113,6 @@ void keyboard_input(unsigned char key, int x, int y)
 			// Gallery view
 			view_number = 0;
 			cam_hgt = 10;
-			cam_x = 0;
-			cam_z = 0;
-			cam_look_x = 0;
-			cam_look_z = 0;
-			cam_look_y = 0;
 			theta = 0;
 			glutPostRedisplay();
 			break;
@@ -130,11 +122,6 @@ void keyboard_input(unsigned char key, int x, int y)
 
 			view_number = 1;
 			cam_hgt = 10;
-			cam_x = 0;
-			cam_z = 0;
-			cam_look_x = 0;
-			cam_look_z = 0;
-			cam_look_y = 0;
 			theta = 0;
 			glutPostRedisplay();
 			break;
@@ -144,11 +131,6 @@ void keyboard_input(unsigned char key, int x, int y)
 
 			view_number = 2;
 			cam_hgt = 10;
-			cam_x = 0;
-			cam_z = 0;
-			cam_look_x = 0;
-			cam_look_z = 0;
-			cam_look_y = 0;
 			theta = 0;
 			glutPostRedisplay();
 			break;
@@ -158,17 +140,16 @@ void keyboard_input(unsigned char key, int x, int y)
 
 			view_number = 3;
 			cam_hgt = 10;
-			cam_x = 0;
-			cam_z = 0;
-			cam_look_x = 0;
-			cam_look_z = 0;
-			cam_look_y = 0;
 			theta = 0;
 			glutPostRedisplay();
 			break;
 	}
 }
 
+float radians(float degrees)
+{
+	return degrees * 3.1415 / 180;
+}
 
 // Draws the checkered floor for the gallery
 void drawFloor()
@@ -210,6 +191,7 @@ void normal(int indx)
 }
 
 
+
 void display(void)
 {
 	float light_pos[4] = { 0., 10., 10., 1.0 };  //light's position
@@ -217,67 +199,41 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
-	float radians = theta * 3.1415 / 180;
-	gluLookAt(12 * sin(radians), cam_hgt, 12 * cos(radians), cam_look_x, 0, cam_look_z, 0, 1, 0);  //Camera position and orientation
+	
 	
 	switch (view_number) {
 	case 0:
-		// Galary view draw checkered floor
-		drawFloor();
-		glLightfv(GL_LIGHT0, GL_POSITION, light_pos);   //Set light position
-
-		drawFloor();
-
-		glEnable(GL_LIGHTING);			//Enable lighting when drawing the teapot
-		glColor3f(0.0, 1.0, 1.0);
-
-
-		// Draws objects
-		glTranslatef(0, 5, 0);
-		glutSolidCube(1);
-		glRotatef(30, 0, 1, 0);
-		glutSolidTeapot(1);
+		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 		break;
 	case 1:
-		// Lighting
-		glLightfv(GL_LIGHT0, GL_POSITION, light_pos);   //Set light position
-
-		glEnable(GL_LIGHTING);			//Enable lighting when drawing the teapot
-		glColor3f(0.0, 1.0, 1.0);
-		glScalef(10, 10, 0);
-		
-		// Draws object
-		for (int indx = 0; indx < nface; indx++)		//draw each face
-		{
-			normal(indx);
-			if (nv[indx] == 3) {
-				glBegin(GL_TRIANGLES);
-			}
-			else {
-				glBegin(GL_QUADS);
-			}
-			glVertex3d(x[t1[indx]], y[t1[indx]], z[t1[indx]]);
-			glVertex3d(x[t2[indx]], y[t2[indx]], z[t2[indx]]);
-			glVertex3d(x[t3[indx]], y[t3[indx]], z[t3[indx]]);
-			if (nv[indx] == 4)
-				glVertex3d(x[t4[indx]], y[t4[indx]], z[t4[indx]]);
-			
-			glEnd();
-		}
-		
+		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 		break;
 	case 2:
-		glBegin(GL_QUADS);
-		glVertex3f(0, 0, 0);
-		glVertex3f(1, 0, 0);
-		glVertex3f(1, 1, 0);
-		glVertex3f(0, 1, 0);
-		glEnd();
+		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 		break;
 	case 3:
+		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 		break;
 	}
+
+
+	// Galary view draw checkered floor
+	drawFloor();
+	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);   //Set light position
+
+	drawFloor();
+
+	glEnable(GL_LIGHTING);			//Enable lighting when drawing the teapot
+	glColor3f(0.0, 1.0, 1.0);
+
+
+	// Draws objects
+	glTranslatef(0, 5, 0);
+	glutSolidCube(1);
+	glRotatef(30, 0, 1, 0);
+	glutSolidTeapot(1);
+
+
 	
 	glFlush();
 }
