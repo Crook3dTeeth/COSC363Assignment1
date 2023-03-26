@@ -210,6 +210,7 @@ void display(void)
 		break;
 	case 2:
 		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
+
 		break;
 	case 3:
 		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
