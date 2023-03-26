@@ -18,12 +18,12 @@
     <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Octahedron.off" />
-    <None Include="Sphere.off" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Model3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AmesWindow.off" />
+    <None Include="square.off" />
   </ItemGroup>
 </Project>

@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -72,19 +72,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\tomkr\source\repos\COSC363\OpenGL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\tomkr\source\repos\COSC363\OpenGL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\tomkr\source\repos\COSC363Assignment1\OpenGL\include;C:\Users\tomkr\source\repos\COSC363\OpenGL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\tomkr\source\repos\COSC363Assignment1\OpenGL\lib;C:\Users\tomkr\source\repos\COSC363\OpenGL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\tomkr\source\repos\COSC363Assignment1\OpenGL\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>C:\Users\tomkr\source\repos\COSC363Assignment1\OpenGL\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\tomkr\source\repos\COSC363\OpenGL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\tomkr\source\repos\COSC363\OpenGL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\tomkr\source\repos\COSC363Assignment1\OpenGL\include;C:\Users\tomkr\source\repos\COSC363\OpenGL\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\tomkr\source\repos\COSC363Assignment1\OpenGL\lib;C:\Users\tomkr\source\repos\COSC363\OpenGL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\tomkr\source\repos\COSC363Assignment1\OpenGL\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>C:\Users\tomkr\source\repos\COSC363Assignment1\OpenGL\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -147,11 +151,11 @@
     <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Octahedron.off" />
-    <None Include="Sphere.off" />
+    <ClCompile Include="Model3D.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Model3D.cpp" />
+    <None Include="AmesWindow.off" />
+    <None Include="square.off" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
