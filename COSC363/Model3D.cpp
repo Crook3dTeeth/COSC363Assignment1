@@ -15,8 +15,14 @@ using namespace std;
 
 // Camera Position data
 int cam_hgt = 10;
+float camX = 0;
+float camY = 0;
+float camZ = 0;
+// cam look data
 float theta = 0;
-
+float lookX = 0;
+float lookY = 0;
+float lookZ = 0;
 
 // Mesh file data
 float* x, * y, * z;					//vertex coordinates
@@ -32,12 +38,14 @@ void special(int key, int x, int y)
 	switch (key) {
 	case GLUT_KEY_UP:
 		// move camera forward
-
+		camX += 1;
+		lookX += 1;
 		glutPostRedisplay();
 		break;
 	case GLUT_KEY_DOWN:
 		// move camera back
-
+		camX -= 1;
+		lookX -= 1;
 
 		glutPostRedisplay();
 		break;
@@ -203,17 +211,16 @@ void display(void)
 	
 	switch (view_number) {
 	case 0:
-		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
+		gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 		break;
 	case 1:
-		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
+		gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 		break;
 	case 2:
-		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
-
+		gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 		break;
 	case 3:
-		gluLookAt(0, cam_hgt, 0, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
+		gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 		break;
 	}
 
