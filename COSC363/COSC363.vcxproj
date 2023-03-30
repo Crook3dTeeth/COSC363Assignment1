@@ -152,10 +152,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Model3D.cpp" />
+    <ClCompile Include="objects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AmesWindow.off" />
-    <None Include="square.off" />
+    <None Include="moire.off" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="objects.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

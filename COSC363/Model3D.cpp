@@ -10,27 +10,28 @@
 #include <climits>
 #include <math.h> 
 #include <GL/freeglut.h>
+#include "objects.h"
 using namespace std;
 
 
 // Camera Position data
-int cam_hgt = 10;
+int cam_hgt = 1;
 float camX = 0;
-float camY = 0;
-float camZ = 0;
+float camZ = 5;
 // cam look data
 float theta = 0;
 float lookX = 0;
-float lookY = 0;
 float lookZ = 0;
-
-// Mesh file data
-float* x, * y, * z;					//vertex coordinates
-int* nv, * t1, * t2, * t3, * t4;		//number of vertices and vertex indices of each face
-int nvert, nface;					//total number of vertices and faces
 
 // Scene rendering variables
 int view_number = 0;
+//Ames window
+float AmesRotation = 0;
+int amesTimer = 5;
+// Moire animation
+float moireX = 0;
+float moireRotation = 7;
+
 
 // Moves the cam up and down using keyboard input
 void special(int key, int x, int y)
@@ -38,79 +39,36 @@ void special(int key, int x, int y)
 	switch (key) {
 	case GLUT_KEY_UP:
 		// move camera forward
-		camX += 1;
-		lookX += 1;
-		glutPostRedisplay();
+		camX += sin(theta) * 0.1;
+		camZ -= cos(theta) * 0.1;
 		break;
 	case GLUT_KEY_DOWN:
 		// move camera back
-		camX -= 1;
-		lookX -= 1;
-
-		glutPostRedisplay();
+		camX -= sin(theta) * 0.1;
+		camZ += cos(theta) * 0.1;
 		break;
 	case GLUT_KEY_LEFT:
 		//cam left
-		theta -= 2;
-		glutPostRedisplay();
+		theta -= 0.075;
 		break;
 	case GLUT_KEY_RIGHT:
 		// cam right
-		theta += 2;
-		glutPostRedisplay();
+		theta += 0.075;
 		break;
 	case GLUT_KEY_PAGE_UP:
 		cam_hgt++;
-		glutPostRedisplay();
 		break;
 	case GLUT_KEY_PAGE_DOWN:
 		cam_hgt--;
-		glutPostRedisplay();
 		break;
 	}
+
+	lookX = camX + 10 * sin(theta);
+	lookZ = camZ - 10 * cos(theta);
+
+	glutPostRedisplay();
 }
 
-
-//-- Loads mesh data in OFF format    -------------------------------------
-void loadMeshFile(const char* fname)
-{
-	ifstream fp_in;
-	int ne;
-
-	fp_in.open(fname, ios::in);
-	if (!fp_in.is_open()) {
-		cout << "Error opening mesh file" << endl;
-		exit(1);
-	}
-
-	fp_in.ignore(INT_MAX, '\n');				//ignore first line
-	fp_in >> nvert >> nface >> ne;			    // read number of vertices, polygons, edges (not used)
-
-	x = new float[nvert];                        //create arrays
-	y = new float[nvert];
-	z = new float[nvert];
-
-	nv = new int[nface];
-	t1 = new int[nface];
-	t2 = new int[nface];
-	t3 = new int[nface];
-	t4 = new int[nface];
-
-	for (int i = 0; i < nvert; i++)                         //read vertex list 
-		fp_in >> x[i] >> y[i] >> z[i];
-
-	for (int i = 0; i < nface; i++)                         //read polygon list 
-	{
-		fp_in >> nv[i] >> t1[i] >> t2[i] >> t3[i];
-		if (nv[i] == 4)
-			fp_in >> t4[i];
-		else
-			t4[i] = -1;
-	}
-
-	fp_in.close();
-	cout << " File successfully read." << endl;
-}
 
 
 // Moves to the art places
@@ -126,7 +84,6 @@ void keyboard_input(unsigned char key, int x, int y)
 			break;
 		case '1':
 			// AAO-1 view
-			loadMeshFile("AmesWindow.off");
 
 			view_number = 1;
 			cam_hgt = 10;
@@ -135,7 +92,6 @@ void keyboard_input(unsigned char key, int x, int y)
 			break;
 		case '2':
 			// AAO-2 view
-			loadMeshFile("square.off");
 
 			view_number = 2;
 			cam_hgt = 10;
@@ -144,7 +100,6 @@ void keyboard_input(unsigned char key, int x, int y)
 			break;
 		case '3':
 			// AAO-3 view
-			loadMeshFile("square.off");
 
 			view_number = 3;
 			cam_hgt = 10;
@@ -154,23 +109,19 @@ void keyboard_input(unsigned char key, int x, int y)
 	}
 }
 
-float radians(float degrees)
-{
-	return degrees * 3.1415 / 180;
-}
 
 // Draws the checkered floor for the gallery
 void drawFloor()
 {
 	bool flag = false;
-	int floor_height = -1;
-	float tile_width = 2;
-	float floor_width = 30;
+	float floor_height = -0.01;
+	float tile_width = 0.2;
+	float floor_width = 10;
 
 	glBegin(GL_QUADS);
 	glNormal3f(0, 1, 0);
-	for (int x = -floor_width; x <= floor_width; x += tile_width) {
-		for (int z = -floor_width; z <= floor_width; z += tile_width) {
+	for (float x = -floor_width; x <= floor_width; x += tile_width) {
+		for (float z = -floor_width; z <= floor_width; z += tile_width) {
 			if (flag) glColor3f(1.0, 1.0, 0.5);
 			else glColor3f(1.0, 0.5, 1.0);
 
@@ -185,78 +136,133 @@ void drawFloor()
 }
 
 
-//--Function to compute the normal vector of a triangle with index indx ----------
-void normal(int indx)
-{
-	float x1 = x[t1[indx]], x2 = x[t2[indx]], x3 = x[t3[indx]];
-	float y1 = y[t1[indx]], y2 = y[t2[indx]], y3 = y[t3[indx]];
-	float z1 = z[t1[indx]], z2 = z[t2[indx]], z3 = z[t3[indx]];
-	float nx, ny, nz;
-	nx = y1 * (z2 - z3) + y2 * (z3 - z1) + y3 * (z1 - z2);
-	ny = z1 * (x2 - x3) + z2 * (x3 - x1) + z3 * (x1 - x2);
-	nz = x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2);
-	glNormal3f(nx, ny, nz);
-}
-
-
-
 void display(void)
 {
-	float light_pos[4] = { 0., 10., 10., 1.0 };  //light's position
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
-	
-	switch (view_number) {
-	case 0:
-		gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
-		break;
-	case 1: 
-		gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
-		break;
-	case 2:
-		gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
-		break;
-	case 3:
-		gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
-		break;
+	if (view_number == 0) {
+		switch (view_number) {
+		case 0:
+			gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
+			break;
+		case 1:
+			gluLookAt(camX, cam_hgt, camZ, lookX + camX, cam_hgt, lookZ + camZ, 0, 1, 0);  //Camera position and orientation
+			break;
+		case 2:
+			gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
+			break;
+		case 3:
+			gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
+			break;
+		}
+	} else {
+		// GET COORDS FOR OTHER STUFF
 	}
 
 
-	// Galary view draw checkered floor
-	drawFloor();
-	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);   //Set light position
+	// Lighting
+	float defualtLight[] = { 0, 5, 0 };
+	//glLightfv(GL_LIGHT0, GL_POSITION, defualtLight);   //Set light position
 
-	drawFloor();
+	float light1_pos[4] = { 1, 10, 0, 1 };
+	float light1_dir[3] = { 0, -1, 0 };
+	float shadowMat[16] = {light1_pos[1], 0, 0, 0, -light1_pos[0], 0, -light1_pos[2], -1, 0, 0, light1_pos[1], 0, 0, 0, 0, light1_pos[1]};
+	glLightfv(GL_LIGHT1, GL_POSITION, light1_pos);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light1_dir);
 
 	glEnable(GL_LIGHTING);			//Enable lighting when drawing the teapot
-	glColor3f(0.0, 1.0, 1.0);
 
+	drawFloor();
 
-	// Draws objects
-	glTranslatef(0, 5, 0);
-	glutSolidCube(1);
-	glRotatef(30, 0, 1, 0);
-	glutSolidTeapot(1);
+	/*
+	// Moire illusion
+	glPushMatrix();
+	glColor3f(0, 0, 0);
+	glScalef(0.5, 0.5, 0);
+	moire();
+	glPopMatrix();
+	glPushMatrix();
+	glColor3f(0, 0, 0);
+	glTranslatef(0.5, 0, 0);
+	glScalef(0.5, 0.5, 0);
+	moire();
+	glPopMatrix();
+	glPushMatrix();
+	glColor3f(0, 0, 0);
+	glTranslatef(1, 0, 0);
+	glScalef(0.5, 0.5, 0);
+	moire();
+	glPopMatrix();
 
+	// Animated moire part
+	glPushMatrix();
+	glColor3f(0, 0, 0);
+	glRotatef(moireRotation, 0, 0, 1);
+	glTranslatef(sin(moireX * 3.1415 / 180), 0, 0.3);
+	glScalef(0.5, 0.5, 0);
+	moire();
+	glPopMatrix();
+	*/
 
+	
+	// Ames windows
+	glPushMatrix();
+	glTranslatef(2.05, 2, 0);
+	glRotatef(AmesRotation, 0, 1, 0);
+	glTranslatef(-2.05, 0, 0);
+	glScalef(0.5, 0.5, 0);
+	amesWindow();
+	glPopMatrix();
+	// Top half
+	glPushMatrix();
+	glTranslatef(2.05, 2, 0);
+	glRotatef(180, 1, 0, 0);
+	glRotatef(-AmesRotation, 0, 1, 0);
+	glTranslatef(-2.05, 0, 0);
+	glScalef(0.5, 0.5, 0);
+	amesWindow();
+	glPopMatrix();
+
+	
 	
 	glFlush();
 }
 
+// Timer function for object animations
+void animationTimer(int value)
+{
+	AmesRotation+= 0.2;
+	moireX += 0.3;
+	glutPostRedisplay();
+	glutTimerFunc(amesTimer, animationTimer, 0);
+}
+
+
+
+
+
+//
 //----------------------------------------------------------------------
 void initialize(void)
 {
+	float SpotlightColor[] = {1, 1, 1, 1};
+
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	
+
 
 	glEnable(GL_LIGHTING);		//Enable OpenGL states
 	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, SpotlightColor);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 50);
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
+
+	loadObjects();
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -277,6 +283,8 @@ int main(int argc, char** argv)
 	glutSpecialFunc(special);
 	// Keyboard input
 	glutKeyboardFunc(keyboard_input);
+	// Timer for animations
+	glutTimerFunc(amesTimer, animationTimer, 0);
 
 	initialize();
 	glutDisplayFunc(display);
