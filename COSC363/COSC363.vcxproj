@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AmesWindow.off" />
+    <None Include="cradle.off" />
     <None Include="moire.off" />
   </ItemGroup>
   <ItemGroup>

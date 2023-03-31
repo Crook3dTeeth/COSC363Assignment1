@@ -128,7 +128,7 @@ void amesWindow()
 		if (indx > 5) {
 			glColor3f(1,0,1);
 		} else {
-			glColor3f(0, 0, 1);
+			glColor3f(1, 0.3, 1);
 		}
 		normal(indx, xAmes, yAmes, zAmes, t1Ames, t2Ames, t3Ames);
 		if (nvAmes[indx] == 3)	glBegin(GL_TRIANGLES);
@@ -156,4 +156,20 @@ void moire()
 			glVertex3d(xMoire[t4Moire[indx]], yMoire[t4Moire[indx]], zMoire[t4Moire[indx]]);
 		glEnd();
 	}
+}
+
+void cradle()
+{
+
+	glBegin(GL_QUADS);
+	glVertex3d(0,0,0);
+	glVertex3d(0.2, 0, 0);
+	glVertex3d(0.2, 0.2, 0);
+	glVertex3d(0.2, 0, 0);
+
+}
+
+void cradleBalls()
+{
+
 }

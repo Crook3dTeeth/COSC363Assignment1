@@ -31,7 +31,9 @@ int amesTimer = 5;
 // Moire animation
 float moireX = 0;
 float moireRotation = 7;
-
+//Spotlights rotation
+float spotlightTheta = 0;
+float spotlightHeight = 3;
 
 // Moves the cam up and down using keyboard input
 void special(int key, int x, int y)
@@ -78,15 +80,19 @@ void keyboard_input(unsigned char key, int x, int y)
 		case '0':
 			// Gallery view
 			view_number = 0;
-			cam_hgt = 10;
+			cam_hgt = 1;
 			theta = 0;
 			glutPostRedisplay();
 			break;
 		case '1':
 			// AAO-1 view
 
+			theta = 0;
+			lookX = 0;
+			lookZ = 0;
+
 			view_number = 1;
-			cam_hgt = 10;
+			cam_hgt = 1;
 			theta = 0;
 			glutPostRedisplay();
 			break;
@@ -94,7 +100,7 @@ void keyboard_input(unsigned char key, int x, int y)
 			// AAO-2 view
 
 			view_number = 2;
-			cam_hgt = 10;
+			cam_hgt = 1;
 			theta = 0;
 			glutPostRedisplay();
 			break;
@@ -102,9 +108,12 @@ void keyboard_input(unsigned char key, int x, int y)
 			// AAO-3 view
 
 			view_number = 3;
-			cam_hgt = 10;
+			cam_hgt = 1;
 			theta = 0;
 			glutPostRedisplay();
+			break;
+		case '4':
+			loadAmesFile("AmesWindow.off");
 			break;
 	}
 }
@@ -142,13 +151,13 @@ void display(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
-	if (view_number == 0) {
-		switch (view_number) {
+	
+	switch (view_number) {
 		case 0:
 			gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 			break;
 		case 1:
-			gluLookAt(camX, cam_hgt, camZ, lookX + camX, cam_hgt, lookZ + camZ, 0, 1, 0);  //Camera position and orientation
+			gluLookAt(12*sin(theta), cam_hgt, 12*cos(theta), 0, cam_hgt, 0, 0, 1, 0);  //Camera position and orientation
 			break;
 		case 2:
 			gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
@@ -156,21 +165,25 @@ void display(void)
 		case 3:
 			gluLookAt(camX, cam_hgt, camZ, lookX, cam_hgt, lookZ, 0, 1, 0);  //Camera position and orientation
 			break;
-		}
-	} else {
-		// GET COORDS FOR OTHER STUFF
 	}
+	
 
 
 	// Lighting
 	float defualtLight[] = { 0, 5, 0 };
 	//glLightfv(GL_LIGHT0, GL_POSITION, defualtLight);   //Set light position
 
-	float light1_pos[4] = { 1, 10, 0, 1 };
+
+	float light1_pos[4] = { 2*sin(-spotlightTheta*0.1), spotlightHeight, 2*cos(-spotlightTheta*0.1), 1 };
 	float light1_dir[3] = { 0, -1, 0 };
-	float shadowMat[16] = {light1_pos[1], 0, 0, 0, -light1_pos[0], 0, -light1_pos[2], -1, 0, 0, light1_pos[1], 0, 0, 0, 0, light1_pos[1]};
+	float light2_pos[4] = { 2 * sin(spotlightTheta * 0.1), spotlightHeight, 2 * cos(spotlightTheta * 0.1), 1 };
+	float light2_dir[3] = { 0, -1, 0 };
+
+
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_pos);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light1_dir);
+	glLightfv(GL_LIGHT2, GL_POSITION, light2_pos);
+	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light2_dir);
 
 	glEnable(GL_LIGHTING);			//Enable lighting when drawing the teapot
 
@@ -204,39 +217,57 @@ void display(void)
 	glScalef(0.5, 0.5, 0);
 	moire();
 	glPopMatrix();
+	
 	*/
 
 	
+	glDisable(GL_LIGHTING);
 	// Ames windows
 	glPushMatrix();
-	glTranslatef(2.05, 2, 0);
+	glTranslatef(4.05, 3, 0);
 	glRotatef(AmesRotation, 0, 1, 0);
-	glTranslatef(-2.05, 0, 0);
-	glScalef(0.5, 0.5, 0);
-	amesWindow();
-	glPopMatrix();
-	// Top half
-	glPushMatrix();
-	glTranslatef(2.05, 2, 0);
-	glRotatef(180, 1, 0, 0);
-	glRotatef(-AmesRotation, 0, 1, 0);
-	glTranslatef(-2.05, 0, 0);
-	glScalef(0.5, 0.5, 0);
+	glTranslatef(-4.05, 0, 0);
+	
 	amesWindow();
 	glPopMatrix();
 
+	// Top half
+	glPushMatrix();
+	glTranslatef(4.05, 3, 0);
+	glRotatef(180, 1, 0, 0);
+	glRotatef(-AmesRotation, 0, 1, 0);
+	glTranslatef(-4.05, 0, 0);
 	
-	
+	amesWindow();
+	glPopMatrix();
+
+	gluSphere(gluNewQuadric(), 0.1, 20, 5);
+
+
 	glFlush();
 }
 
 // Timer function for object animations
 void animationTimer(int value)
 {
-	AmesRotation+= 0.2;
+	AmesRotation += 0.2;
+	
 	moireX += 0.3;
 	glutPostRedisplay();
-	glutTimerFunc(amesTimer, animationTimer, 0);
+
+	if (value % 200 == 0) {
+		spotlightTheta += 0.05;
+	}
+	
+
+
+	// Will be used later for model construction later
+	if (value > 100) {
+		value = 0;
+	} else {
+		value++;
+	}
+	glutTimerFunc(amesTimer, animationTimer, value);
 }
 
 
@@ -247,17 +278,31 @@ void animationTimer(int value)
 //----------------------------------------------------------------------
 void initialize(void)
 {
-	float SpotlightColor[] = {1, 1, 1, 1};
+	float Spotlight1Color[] = {1, 0, 0, 1};		// Red
+	float Spotlight2Color[] = { 0, 1, 0, 1 };	// Green
+
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 
 	glEnable(GL_LIGHTING);		//Enable OpenGL states
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, SpotlightColor);
+	glEnable(GL_LIGHT0);		// Light 1
+	glEnable(GL_LIGHT1);		// Spotlight 1
+	glEnable(GL_LIGHT2);		// Spotloght 2
+	glEnable(GL_LIGHT3);		// Shadow light
+
+
+	// Spotlight 1
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, Spotlight1Color);
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20);
 	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 50);
+	// Spotlight 2
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, Spotlight2Color);
+	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 20);
+	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 50);
+
+
+
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_NORMALIZE);
