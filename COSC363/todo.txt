@@ -1,0 +1,20 @@
+BUGS:
+	changing views doesn't change distance
+	Ames window...
+
+
+
+TODO:
+	remove temp variables 
+		FPS counter
+	newtons cradle
+		shadows lecture notes 6
+		collisions
+		move to object based balls
+		animation sequence
+
+
+p = mv
+E = 1/2 m * v ^ 2
+
+distance = sqrt((x2-x1)^2+()^2)

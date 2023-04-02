@@ -2,6 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <climits>
+#include <list>
+#include <vector>
+#include <stdlib.h>
 #include <math.h> 
 #include <GL/freeglut.h>
 using namespace std;
@@ -17,6 +20,30 @@ float* xMoire, * yMoire, * zMoire;					//vertex coordinates
 int* nvMoire, * t1Moire, * t2Moire, * t3Moire, * t4Moire;		//number of vertices and vertex indices of each face
 int nvertMoire, nfaceMoire;					//total number of vertices and faces
 
+
+
+
+class cradleBalls {
+public:
+	vector<ball> cradleData;
+
+	cradleBalls()
+	{
+
+	}
+
+	void inset(ball data)
+	{
+		cradleData.push_back(data);
+	}
+
+	void updateBalls(float dt)
+	{
+		for (int i = 0; i < cradleData.size(); i++) {
+			cradleData[i].updatePosition(dt);
+		}
+	}
+};
 
 
 void loadObjects()
@@ -121,14 +148,53 @@ void loadMoireFile(const char* fname)
 }
 
 
+void axis(float lineWidth)
+{
+	GLfloat current_color[4];
+	glGetFloatv(GL_CURRENT_COLOR, current_color);
+
+	glLineWidth(lineWidth);
+	//glDisable(GL_LIGHTING);
+	// Draw X axis in red
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glBegin(GL_LINES);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(1.0f, 0.0f, 0.0f);
+	glEnd();
+
+	// Draw Y axis in green
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glBegin(GL_LINES);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 1.0f, 0.0f);
+	glEnd();
+
+	// Draw Z axis in blue
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glBegin(GL_LINES);
+	glVertex3f(0.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.0f, 1.0f);
+	glEnd();
+	glEnable(GL_LIGHTING);
+
+	glColor3fv(current_color);
+}
+
+
 void amesWindow()
 {
+
 	for (int indx = 0; indx < nfaceAmes; indx++)		//draw each face
 	{
 		if (indx > 5) {
-			glColor3f(1,0,1);
+			GLfloat color[] = { 1.0f, 1.0f, 0.95f };
+
+			//glMaterialf(GL_FRONT_AND_BACK, GL_AMBIENT, *color);
+			glColor3f(1.0,0.647,0);
 		} else {
-			glColor3f(1, 0.3, 1);
+			GLfloat color[] = { 1.0f, 1.0f, 0.95f};
+
+			glColor3f(1, 1, 0.95);
 		}
 		normal(indx, xAmes, yAmes, zAmes, t1Ames, t2Ames, t3Ames);
 		if (nvAmes[indx] == 3)	glBegin(GL_TRIANGLES);

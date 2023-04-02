@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
+    <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Model3D.cpp" />
