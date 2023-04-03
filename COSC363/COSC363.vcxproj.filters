@@ -40,5 +40,21 @@
     <ClInclude Include="physics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="loadTGA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="loadBMP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="staticIllusion1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="staticIllusion2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Brick_Texture.tga" />
+    <Image Include="Wall_Texture.tga" />
   </ItemGroup>
 </Project>

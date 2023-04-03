@@ -1,12 +1,12 @@
 BUGS:
-	changing views doesn't change distance
+	changing views doesn't update cam position
 	Ames window...
-
 
 
 TODO:
 	remove temp variables 
 		FPS counter
+		Key presses (4 reloads ames window)
 	newtons cradle
 		shadows lecture notes 6
 		animation sequence
@@ -15,15 +15,15 @@ TODO:
 
 Extra features:
 	DONE planar shadow
-		Transparency
 	spot light on a moving/rotating object
 	DONE physics based animation						
-	texture stuff
-		A texture mapped sweep surface
-		A texture mapped triangle strip or quad strip that is not part of a sweep surface 
-		2 x texture mapped quad showing a static optical illusion
+	A texture mapped sweep surface
+	DONE A texture mapped triangle strip or quad strip that is not part of a sweep surface 
+	DONE 2 x texture mapped quad showing a static optical illusion
 
 p = mv
 E = 1/2 m * v ^ 2
 
 distance = sqrt((x2-x1)^2+()^2)
+
+static illusions: https://www.shutterstock.com/blog/illusion-of-movement-in-static-design

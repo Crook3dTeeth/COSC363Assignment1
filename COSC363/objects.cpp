@@ -41,7 +41,6 @@ void normal(int indx, float* x, float* y, float* z, int t1[], int t2[], int t3[]
 	glNormal3f(nx, ny, nz);
 }
 
-
 void loadAmesFile(const char* fname)
 {
 	ifstream fp_in;
@@ -122,7 +121,6 @@ void loadMoireFile(const char* fname)
 	cout << " File successfully read." << endl;
 }
 
-
 void axis(float lineWidth)
 {
 	GLfloat current_color[4];
@@ -154,7 +152,6 @@ void axis(float lineWidth)
 
 	glColor3fv(current_color);
 }
-
 
 void amesWindow()
 {
@@ -207,10 +204,5 @@ void cradle()
 	glVertex3d(0.2, 0, 0);
 	glVertex3d(0.2, 0.2, 0);
 	glVertex3d(0.2, 0, 0);
-
-}
-
-void cradleBalls()
-{
 
 }

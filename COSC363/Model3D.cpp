@@ -15,13 +15,16 @@
 #include <GL/freeglut.h>
 #include "objects.h"
 #include "physics.h"
+#include "loadBMP.h"
+#include "loadTGA.h"
+
 using namespace std;
 
 
 // Camera Position data
-int cam_hgt = 1;
+float cam_hgt = 1.5;
 float camX = 0;
-float camZ = 5;
+float camZ = 10;
 // cam look data
 float theta = 0;
 float lookX = 0;
@@ -29,7 +32,7 @@ float lookZ = 0;
 float camDistance = 4;
 
 // Scene rendering variables
-int view_number = 3;
+int view_number = 0;
 //Ames window
 float AmesRotation = 0;
 int animationTime = 5;
@@ -86,7 +89,6 @@ float shadowMat[16] = { light[1],	0,		0,		0,
 							0,		0,		0,		light[1] };
 
 
-
 ball ball1(ball1X, cradleHeight, 0.0, cradleStandX + 0.6, cradleStandY, light, shadowMat);
 ball ball2(ball2X, cradleHeight, 0.0, cradleStandX + 0.3, cradleStandY, light, shadowMat);
 ball ball3(ball3X, cradleHeight, 0.0, cradleStandX		, cradleStandY, light, shadowMat);
@@ -97,6 +99,26 @@ cradleBalls newtonsCradle(ball3X, ball3Y + stringLength, ball3Z, cradleHeight);
 //Spotlights rotation
 float spotlightTheta = 0;
 float spotlightHeight = 3;
+
+// Texture stuff
+GLuint txId[3];
+// Wall stuff
+const int wallPoints = 10;
+float wallRadius = 9.0f;
+float wallX[wallPoints + 1];
+float wallZ[wallPoints + 1];
+float wallHeight = 1.0f;
+float wallTexH = 4;
+float wallR = 70;
+// Swept surface stuff
+const int sweptPoint = 50;
+float frequency = 1;
+float sweptVX[sweptPoint];
+float sweptVY[sweptPoint];
+
+float sweptNX[sweptPoint];
+float sweptNY[sweptPoint];
+
 
 // TEMP VARIABLES
 const int NUM_FRAMES = 60; // Number of frames to average over
@@ -146,10 +168,10 @@ void special(int key, int x, int y)
 		}
 		break;
 	case GLUT_KEY_PAGE_UP:
-		cam_hgt++;
+		cam_hgt += 0.1;
 		break;
 	case GLUT_KEY_PAGE_DOWN:
-		cam_hgt--;
+		cam_hgt -= 0.1;
 		break;
 	}
 
@@ -170,7 +192,11 @@ void keyboard_input(unsigned char key, int x, int y)
 			// Gallery view
 			view_number = 0;
 			cam_hgt = 1;
+			camX = 0;
+			camZ = 10;
 			theta = 0;
+			lookX = camX + 10 * sin(theta);
+			lookZ = camZ - 10 * cos(theta);
 			glutPostRedisplay();
 			break;
 		case '1':
@@ -213,7 +239,20 @@ void keyboard_input(unsigned char key, int x, int y)
 			glutPostRedisplay();
 			break;
 		case '4':
+			// Reloads ameswindow file for editing it on the fly
 			loadAmesFile("AmesWindow.off");
+			break;
+		case '5':
+			wallR -= 1;
+			break;
+		case '8':
+			wallR += 1;
+			break;
+		case '6':
+			wallTexH -= 1;
+			break;
+		case '9':
+			wallTexH += 1;
 			break;
 	}
 }
@@ -267,6 +306,95 @@ void drawFloor()
 }
 
 
+void renderSwept()
+{
+	float vx[sweptPoint], vy[sweptPoint], vz[sweptPoint];   //vertex positions
+	float wx[sweptPoint], wy[sweptPoint], wz[sweptPoint];
+	float nx[sweptPoint], ny[sweptPoint], nz[sweptPoint];   //normal vectors
+	float mx[sweptPoint], my[sweptPoint], mz[sweptPoint];
+	float normalx, normaly;
+
+	// Calculate normals
+	for (int i = 0; i < sweptPoint; i++) {
+		if (i == 0) //End point of the curve
+		{
+			normalx = sweptVY[1] - sweptVY[0];
+			normaly = -sweptVX[1] + sweptVX[0];
+		} else if (i == sweptPoint - 1) //End point of the curve
+		{
+			normalx = sweptVY[i] - sweptVY[i - 1];
+			normaly = -sweptVX[i] + sweptVX[i - 1];
+		} else //All interior points
+		{
+			normalx = sweptVY[i + 1] - sweptVY[i - 1]; //x-component of n1+n2
+			normaly = -sweptVX[i + 1] + sweptVX[i - 1]; //y-component of n1+n2
+		}
+		float dist = sqrt(normalx * normalx + normaly * normaly); //normalization
+		normalx /= dist;
+		normaly /= dist;
+		sweptNX[i] = normalx; //Store values in an array
+		sweptNX[i] = normaly;
+	}
+
+
+
+	for (int i = 0; i < sweptPoint; i++)		//Initialize data everytime the frame is refreshed
+	{
+		vx[i] = sweptVX[i];
+		vy[i] = sweptVY[i];
+		vz[i] = 0;
+		nx[i] = sweptNX[i];
+		ny[i] = sweptNY[i];
+		nz[i] = 0;
+	}
+
+	glColor3f(1, 0.75, 0.5);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+
+	int nSlices = 36;
+	float angStep = 10 * 3.1415 / 180;
+
+	for (int j = 0; j < nSlices; j++) {
+		for (int i = 0; i < sweptPoint; i++) {
+			wx[i] = cos(angStep) * vx[i] + sin(angStep) * vz[i];
+			wy[i] = vy[i];
+			wz[i] = -sin(angStep) * vx[i] + cos(angStep) * vz[i];
+		}
+
+		glBegin(GL_QUAD_STRIP);
+		for (int i = 0; i < sweptPoint; i++) {
+			glVertex3f(vx[i], vy[i], vz[i]);
+			glVertex3f(wx[i], wy[i], wz[i]);
+		}
+		glEnd();
+
+		for (int i = 0; i < sweptPoint; i++)    //Update vertices
+		{
+			vx[i] = wx[i];
+			vy[i] = wy[i];
+			vz[i] = wz[i];
+		}
+	}
+
+	glFlush();
+}
+
+
+void normal(int i)
+{
+	float xdiff1, zdiff1, xdiff2, zdiff2;
+	if (i == 0 || i == 12) glNormal3f(-1, 0, 0);   //default normal along -x direction
+	else {
+		xdiff1 = wallX[i] - wallX[i - 1];
+		zdiff1 = wallZ[i] - wallZ[i - 1];
+		xdiff2 = wallX[i + 1] - wallX[i];
+		zdiff2 = wallZ[i + 1] - wallZ[i];
+		glNormal3f(-(zdiff1 + zdiff2), 0, (xdiff1 + xdiff2));
+	}
+}
+
+
 void display(void)
 {
 	// FPS
@@ -309,13 +437,20 @@ void display(void)
 	
 	glEnable(GL_LIGHTING);			//Enable lighting
 
-	// Lighting
+	// Lighting	
+	float light0_pos[4] = { 0, 6, 0, 1 };
 
-	GLfloat light1_pos[4] = { 2*sin(-spotlightTheta*0.1), spotlightHeight, 2*cos(-spotlightTheta*0.1), 1 };
+	// Spotlights
+	
+	GLfloat light1_pos[4] = { 2 * sin(-spotlightTheta * 0.1), spotlightHeight, 2 * cos(-spotlightTheta * 0.1), 1 };
 	float light1_dir[3] = { 0, -1, 0 };
 	GLfloat light2_pos[4] = { 2 * sin(spotlightTheta * 0.1), spotlightHeight, 2 * cos(spotlightTheta * 0.1), 1 };
 	float light2_dir[3] = { 0, -1, 0 };
-	float light0_pos[4] = { 0, 6, 0, 1 };
+	glLightfv(GL_LIGHT1, GL_POSITION, light1_pos);
+	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light1_dir);
+	glLightfv(GL_LIGHT2, GL_POSITION, light2_pos);
+	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light2_dir);
+	
 
 	GLfloat light0ambient[] = { 0.6f, 0.6f, 0.6f, 1.0f };
 	GLfloat light0diffuse[] = { 0.5f, 0.5f, 0.5f, 1.0f };
@@ -325,13 +460,6 @@ void display(void)
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light0diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light0specular);
 	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
-
-
-	// Spotlights
-	glLightfv(GL_LIGHT1, GL_POSITION, light1_pos);
-	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light1_dir);
-	glLightfv(GL_LIGHT2, GL_POSITION, light2_pos);
-	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light2_dir);
 
 	
 	glDisable(GL_LIGHT0);
@@ -379,28 +507,97 @@ void display(void)
 	#pragma endregion
 	
 
-	
+	#pragma region AmesWindow
+
+
+
 	//glDisable(GL_LIGHTING);
 	// Ames windows
+
 	glPushMatrix();
 	glRotatef(AmesRotation, 0, 1, 0);
-	glTranslatef(-2.025, 1.5, 0);
-	glScalef(0.5,0.5,0.5);
+	glTranslatef(-0.615, 1.5, 0);
+	glScalef(0.3,0.5,0.3);
 	amesWindow();
 	glPopMatrix();
 
 	// Top half
 	glPushMatrix();
-
 	glScalef(-1, 1, 1);
 	glRotatef(180, 0, 0, 1);
 	glRotatef(AmesRotation, 0, 1, 0);
-	glTranslatef(-2.025, -1.5, 0);
-	glScalef(0.5, 0.5, 0.5);
+	glTranslatef(-0.615, -1.5, 0);
+	glScalef(0.3, 0.5, 0.3);
 	amesWindow();
 	glPopMatrix();
+	#pragma endregion
+
 
 	axis(1.0f);
+
+
+	#pragma region StaticTexture
+
+	glPushMatrix();
+	glEnable(GL_TEXTURE_2D);
+	glColor3f(1, 1, 1);
+	glBindTexture(GL_TEXTURE_2D, txId[0]);
+	glTranslatef(3, 0, 4);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0., 0.);
+	glVertex3f(-1.5, 0, 0);
+	glTexCoord2f(1., 0.);
+	glVertex3f(1.5, 0, 0);
+	glTexCoord2f(1., 1.);
+	glVertex3f(1.5, 3, 0);
+	glTexCoord2f(0., 1.);
+	glVertex3f(-1.5, 3, 0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
+
+	glPushMatrix();
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, txId[1]);
+	glTranslatef(-3, 0, 4);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0., 0.);
+	glVertex3f(-1.5, 0, 0);
+	glTexCoord2f(1., 0.);
+	glVertex3f(1.5, 0, 0);
+	glTexCoord2f(1., 1.);
+	glVertex3f(1.5, 3, 0);
+	glTexCoord2f(0., 1.);
+	glVertex3f(-1.5, 3, 0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
+
+	#pragma endregion
+
+	
+	#pragma region quadStrip_(Wall)
+
+	glPushMatrix();
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, txId[2]);
+	glColor3f(1, 1, 1);
+	glLineWidth(1.0);
+	glBegin(GL_QUAD_STRIP);
+	for (int i = 0; i <= wallPoints; i++) {
+		normal(i);
+		glTexCoord2f(i * wallR / (wallPoints), 0);
+		glVertex3f(wallX[i], 0, wallZ[i]);
+		glTexCoord2f(i * wallR / (wallPoints), wallTexH);
+		glVertex3f(wallX[i], wallHeight, wallZ[i]);
+
+	}
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+
+	glPopMatrix();
+
+	#pragma endregion
 
 
 	#pragma region newtons_cradle
@@ -468,11 +665,11 @@ void display(void)
     glMatrixMode(GL_MODELVIEW);
 	#pragma endregion
 
+	renderSwept();
+
 	glFlush();
 	//glutSwapBuffers();
 }
-
-
 
 
 // Timer function for object animations
@@ -536,6 +733,46 @@ void animationTimer(int value)
 }
 
 
+void loadTexture()
+{
+	glGenTextures(3, txId);   //Get 3 texture IDs 
+	glBindTexture(GL_TEXTURE_2D, txId[0]);  //Use this texture name for the following OpenGL texture
+	loadBMP("staticIllusion1.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[1]);  //Use this texture name for the following OpenGL texture
+	loadBMP("staticIllusion2.bmp");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, txId[2]);
+	loadTGA("Brick_Texture.tga");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+}
+
+
+void generateWallCoords()
+{
+	for (int i = 0; i <= wallPoints; i++) {
+		wallX[i] = wallRadius * cos((2 * 3.1415 * i / wallPoints));
+		wallZ[i] = wallRadius * sin((2 * 3.1415 * i / wallPoints));
+	}
+}
+
+
+void generateSweptCoords(float f = frequency)
+{
+	for (int i = 0; i < sweptPoint; i++) {
+		sweptVX[i] = (i / sweptPoint) * 0.5;
+		sweptVY[i] = (f * cos((i / sweptPoint) * 0.5));
+	}
+}
+
+
 
 
 
@@ -571,7 +808,7 @@ void initialize(void)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60, 1, 1.0, 1000.0);   //Camera Frustum
+	gluPerspective(50, 1, 1.0, 1000.0);   //Camera Frustum
 
 
 	// Newtons cradle initialize
@@ -581,6 +818,12 @@ void initialize(void)
 	newtonsCradle.inset(ball4);
 	newtonsCradle.inset(ball5);
 	newtonsCradle.print();
+
+	// Texture stuff
+	loadTexture();
+	generateSweptCoords();
+	generateWallCoords();
+
 }
 
 

@@ -101,7 +101,7 @@ public:
 			glTranslatef(ballX, ballY, ballZ);
 			glutSolidSphere(cradleRadius, 20, 30);
 		glPopMatrix();
-
+		glEnable(GL_LIGHTING);
 		//glDisable(GL_BLEND);
 		
 	}
