@@ -15,11 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt" />
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Model3D.cpp">
+    <ClCompile Include="source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="objects.cpp">
@@ -33,6 +32,8 @@
     <None Include="AmesWindow.off" />
     <None Include="moire.off" />
     <None Include="Optical Illusions Art Gallery Report.docx" />
+    <None Include="cmake" />
+    <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="objects.h">

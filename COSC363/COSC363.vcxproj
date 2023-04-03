@@ -148,16 +148,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt" />
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Model3D.cpp" />
+    <ClCompile Include="source.cpp" />
     <ClCompile Include="objects.cpp" />
     <ClCompile Include="physics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AmesWindow.off" />
+    <None Include="cmake" />
+    <None Include="Makefile" />
     <None Include="moire.off" />
     <None Include="Optical Illusions Art Gallery Report.docx" />
   </ItemGroup>
