@@ -110,14 +110,6 @@ float wallZ[wallPoints + 1];
 float wallHeight = 1.0f;
 float wallTexH = 4;
 float wallR = 70;
-// Swept surface stuff
-const int sweptPoint = 50;
-float frequency = 1;
-float sweptVX[sweptPoint];
-float sweptVY[sweptPoint];
-
-float sweptNX[sweptPoint];
-float sweptNY[sweptPoint];
 
 
 // TEMP VARIABLES
@@ -306,81 +298,6 @@ void drawFloor()
 }
 
 
-void renderSwept()
-{
-	float vx[sweptPoint], vy[sweptPoint], vz[sweptPoint];   //vertex positions
-	float wx[sweptPoint], wy[sweptPoint], wz[sweptPoint];
-	float nx[sweptPoint], ny[sweptPoint], nz[sweptPoint];   //normal vectors
-	float mx[sweptPoint], my[sweptPoint], mz[sweptPoint];
-	float normalx, normaly;
-
-	// Calculate normals
-	for (int i = 0; i < sweptPoint; i++) {
-		if (i == 0) //End point of the curve
-		{
-			normalx = sweptVY[1] - sweptVY[0];
-			normaly = -sweptVX[1] + sweptVX[0];
-		} else if (i == sweptPoint - 1) //End point of the curve
-		{
-			normalx = sweptVY[i] - sweptVY[i - 1];
-			normaly = -sweptVX[i] + sweptVX[i - 1];
-		} else //All interior points
-		{
-			normalx = sweptVY[i + 1] - sweptVY[i - 1]; //x-component of n1+n2
-			normaly = -sweptVX[i + 1] + sweptVX[i - 1]; //y-component of n1+n2
-		}
-		float dist = sqrt(normalx * normalx + normaly * normaly); //normalization
-		normalx /= dist;
-		normaly /= dist;
-		sweptNX[i] = normalx; //Store values in an array
-		sweptNX[i] = normaly;
-	}
-
-
-
-	for (int i = 0; i < sweptPoint; i++)		//Initialize data everytime the frame is refreshed
-	{
-		vx[i] = sweptVX[i];
-		vy[i] = sweptVY[i];
-		vz[i] = 0;
-		nx[i] = sweptNX[i];
-		ny[i] = sweptNY[i];
-		nz[i] = 0;
-	}
-
-	glColor3f(1, 0.75, 0.5);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
-
-	int nSlices = 36;
-	float angStep = 10 * 3.1415 / 180;
-
-	for (int j = 0; j < nSlices; j++) {
-		for (int i = 0; i < sweptPoint; i++) {
-			wx[i] = cos(angStep) * vx[i] + sin(angStep) * vz[i];
-			wy[i] = vy[i];
-			wz[i] = -sin(angStep) * vx[i] + cos(angStep) * vz[i];
-		}
-
-		glBegin(GL_QUAD_STRIP);
-		for (int i = 0; i < sweptPoint; i++) {
-			glVertex3f(vx[i], vy[i], vz[i]);
-			glVertex3f(wx[i], wy[i], wz[i]);
-		}
-		glEnd();
-
-		for (int i = 0; i < sweptPoint; i++)    //Update vertices
-		{
-			vx[i] = wx[i];
-			vy[i] = wy[i];
-			vz[i] = wz[i];
-		}
-	}
-
-	glFlush();
-}
-
-
 void normal(int i)
 {
 	float xdiff1, zdiff1, xdiff2, zdiff2;
@@ -442,10 +359,10 @@ void display(void)
 
 	// Spotlights
 	
-	GLfloat light1_pos[4] = { 2 * sin(-spotlightTheta * 0.1), spotlightHeight, 2 * cos(-spotlightTheta * 0.1), 1 };
-	float light1_dir[3] = { 0, -1, 0 };
-	GLfloat light2_pos[4] = { 2 * sin(spotlightTheta * 0.1), spotlightHeight, 2 * cos(spotlightTheta * 0.1), 1 };
-	float light2_dir[3] = { 0, -1, 0 };
+	GLfloat light1_pos[4] = { ball1.ballX, ball1.ballY, ball1.ballZ, 1 };
+	float light1_dir[3] = { 0, -1, 0.5 };
+	GLfloat light2_pos[4] = { ball5.ballX, ball5.ballY, ball5.ballZ, 1 };
+	float light2_dir[3] = { 0, -1, 0.5 };
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_pos);
 	glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light1_dir);
 	glLightfv(GL_LIGHT2, GL_POSITION, light2_pos);
@@ -497,23 +414,31 @@ void display(void)
 	glColor3f(0, 0, 0);
 	glTranslatef(moireX + 0.5, moireY + 1.5, moireZ);
 	glRotatef(moireRotation, 0, 0, 1);
-	axis();
 	glScalef(0.5, 0.55, 1);
 	glTranslatef(-0.225, -2.5, 0);
-	
 	moire();
-	
 	glPopMatrix();
+	glPushMatrix();
+	glColor3f(0, 0, 0);
+	glTranslatef(moireX+0.5, moireY + 1.5, moireZ);
+	glRotatef(moireRotation, 0, 0, 1);
+	glScalef(0.5, 0.55, 1);
+	glTranslatef(+0.8, -2.5, 0);
+	moire();
+	glPopMatrix();
+	glPushMatrix();
+	glColor3f(0, 0, 0);
+	glTranslatef(moireX + 0.5, moireY + 1.5, moireZ);
+	glRotatef(moireRotation, 0, 0, 1);
+	glScalef(0.5, 0.55, 1);
+	glTranslatef(-1.225, -2.5, 0);
+	moire();
+	glPopMatrix();
+
 	#pragma endregion
 	
 
 	#pragma region AmesWindow
-
-
-
-	//glDisable(GL_LIGHTING);
-	// Ames windows
-
 	glPushMatrix();
 	glRotatef(AmesRotation, 0, 1, 0);
 	glTranslatef(-0.615, 1.5, 0);
@@ -531,9 +456,6 @@ void display(void)
 	amesWindow();
 	glPopMatrix();
 	#pragma endregion
-
-
-	axis(1.0f);
 
 
 	#pragma region StaticTexture
@@ -576,7 +498,7 @@ void display(void)
 	#pragma endregion
 
 	
-	#pragma region quadStrip_(Wall)
+	#pragma region quadStrip
 
 	glPushMatrix();
 	glEnable(GL_TEXTURE_2D);
@@ -665,7 +587,6 @@ void display(void)
     glMatrixMode(GL_MODELVIEW);
 	#pragma endregion
 
-	renderSwept();
 
 	glFlush();
 	//glutSwapBuffers();
@@ -684,7 +605,7 @@ void animationTimer(int value)
 	}
 	
 	if (value % 4 == 0) {
-		moireRotation += 1;
+		moireRotation += 0.75;
 	}
 
 	// Newtons cradle
@@ -764,18 +685,6 @@ void generateWallCoords()
 }
 
 
-void generateSweptCoords(float f = frequency)
-{
-	for (int i = 0; i < sweptPoint; i++) {
-		sweptVX[i] = (i / sweptPoint) * 0.5;
-		sweptVY[i] = (f * cos((i / sweptPoint) * 0.5));
-	}
-}
-
-
-
-
-
 void initialize(void)
 {
 	float Spotlight1Color[] = {1, 0, 0, 1};		// Red
@@ -792,12 +701,12 @@ void initialize(void)
 
 	// Spotlight 1
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, Spotlight1Color);
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 50);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10);
 	// Spotlight 2
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, Spotlight2Color);
-	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 20);
-	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 50);
+	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 90);
+	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 10);
 
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
@@ -821,9 +730,7 @@ void initialize(void)
 
 	// Texture stuff
 	loadTexture();
-	generateSweptCoords();
 	generateWallCoords();
-
 }
 
 

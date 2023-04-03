@@ -7,15 +7,11 @@ TODO:
 	remove temp variables 
 		FPS counter
 		Key presses (4 reloads ames window)
-	newtons cradle
-		shadows lecture notes 6
-		animation sequence
-	Move spotlight to an object
 
 
 Extra features:
 	DONE planar shadow
-	spot light on a moving/rotating object
+	DONE spot light on a moving/rotating object
 	DONE physics based animation						
 	A texture mapped sweep surface
 	DONE A texture mapped triangle strip or quad strip that is not part of a sweep surface 

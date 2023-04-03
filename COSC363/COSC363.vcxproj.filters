@@ -32,6 +32,7 @@
   <ItemGroup>
     <None Include="AmesWindow.off" />
     <None Include="moire.off" />
+    <None Include="Optical Illusions Art Gallery Report.docx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="objects.h">
