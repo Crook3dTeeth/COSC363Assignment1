@@ -10,9 +10,11 @@
 #include <string.h>
 #include <fstream>
 #include <climits>
+#include <vector>
 #include <math.h> 
 #include <GL/freeglut.h>
 #include "objects.h"
+#include "physics.h"
 using namespace std;
 
 
@@ -47,9 +49,6 @@ float cradleHeight = 0.7f;
 float ball1X = -5.0 + 0.6;
 float ball1Y = 0.0 + cradleHeight;
 float ball1Z = 0.0;
-
-
-
 float ball2X = -5.0 + 0.3;
 float ball2Y = 0.0 + cradleHeight;
 float ball2Z = 0.0;
@@ -63,45 +62,37 @@ float ball5X = -5.0 - 0.6;
 float ball5Y = 0.0 + cradleHeight;
 float ball5Z = 0.0;
 float stringLength = 1.7;
-float ball1M = 0;		// Momentum
-float ball2M = 0;
-float ball3M = 0;
-float ball4M = 0;
-float ball5M = 0;
-float ball1E = 0;
-float ball2E = 0;
-float ball3E = 0;
-float ball4E = 0;
-float ball5E = 0;
-float v1 = 0;	// Velocity (angular)
-float v2 = 0;
-float v3 = 0;
-float v4 = 0;
-float v5 = 0;
-float ball1Angle = 0;	// Angle for initial drop
-float ball2Angle = 0;
-float ball3Angle = 0;
-float ball4Angle = 0;
-float ball5Angle = 0;
+
 float g = -9.81;
 float m = 1;			// Ball mass
 float a = 0;
 bool dropped = false;
-
-
-
+int currentDrop = 0;
 
 // Cradle stand
 float cradleStandX = ball3X;
 float cradleStandY = ball3Y + stringLength;
 float cradleStandZ = ball3Z;
 // Cradle variables
-float cradleRadius = 0.15;
+float acuMomentum = 0;
+float averageMomentum = 0;
 float ballReleaseHeight = 45;	// Initial release height (degrees)
 
 
+float light[4] = {-5, 2, 1, 1 };
+float shadowMat[16] = { light[1],	0,		0,		0, 
+						-light[0],	0, -light[2],	-1, 
+							0,		0,	light[1],	0, 
+							0,		0,		0,		light[1] };
 
-ball ball1(ball1X, cradleHeight, 0.0, cradleStandX + 0.6, cradleStandY);
+
+
+ball ball1(ball1X, cradleHeight, 0.0, cradleStandX + 0.6, cradleStandY, light, shadowMat);
+ball ball2(ball2X, cradleHeight, 0.0, cradleStandX + 0.3, cradleStandY, light, shadowMat);
+ball ball3(ball3X, cradleHeight, 0.0, cradleStandX		, cradleStandY, light, shadowMat);
+ball ball4(ball4X, cradleHeight, 0.0, cradleStandX - 0.3, cradleStandY, light, shadowMat);
+ball ball5(ball5X, cradleHeight, 0.0, cradleStandX - 0.6, cradleStandY, light, shadowMat);
+cradleBalls newtonsCradle(ball3X, ball3Y + stringLength, ball3Z, cradleHeight);
 
 //Spotlights rotation
 float spotlightTheta = 0;
@@ -114,6 +105,7 @@ float fps_average = 0.0f;
 int frame_count = 0;
 float current_time = 0.0f;
 float previous_time = 0.0f;
+float MAX = 100000;
 
 // Moves the cam up and down using keyboard input
 void special(int key, int x, int y)
@@ -414,35 +406,12 @@ void display(void)
 	#pragma region newtons_cradle
 
 	// 5 balls/string and stand?
-	glPushMatrix();
-	glColor3f(0.5f, 0.5f, 0.5f);
-	glTranslatef(ball1.ballX, ball1.ballY, ball1.ballZ);
-	glutSolidSphere(cradleRadius, 30, 10);
-	glPopMatrix();
-
-	glPushMatrix();
-	glColor3f(0.5f, 0.5f, 0.5f);
-	glTranslatef(ball2X, ball2Y, ball2Z);
-	glutSolidSphere(cradleRadius, 30, 10);
-	glPopMatrix();
-
-	glPushMatrix();
-	glColor3f(0.5f, 0.5f, 0.5f);
-	glTranslatef(ball3X, ball3Y, ball3Z);
-	glutSolidSphere(cradleRadius, 30, 10);
-	glPopMatrix();
-
-	glPushMatrix();
-	glColor3f(0.5f, 0.5f, 0.5f);
-	glTranslatef(ball4X, ball4Y, ball4Z);
-	glutSolidSphere(cradleRadius, 30, 10);
-	glPopMatrix();
-
-	glPushMatrix();
-	glColor3f(0.5f, 0.5f, 0.5f);
-	glTranslatef(ball5X, ball5Y, ball5Z);
-	glutSolidSphere(cradleRadius, 30, 10);
-	glPopMatrix();
+	//newtonsCradle.renderBalls();
+	ball1.renderBall();
+	ball2.renderBall();
+	ball3.renderBall();
+	ball4.renderBall();
+	ball5.renderBall();
 
 	// Top stand
 	glPushMatrix();
@@ -461,13 +430,13 @@ void display(void)
 	
 	glVertex3f(cradleStandX + 0.6, cradleStandY, cradleStandZ);
 	glVertex3f(ball1.ballX, ball1.ballY, ball1.ballZ);
-	glVertex3f(ball2X, ball2Y, ball2Z);
+	glVertex3f(ball2.ballX, ball2.ballY, ball2.ballZ);
 	glVertex3f(cradleStandX + 0.3, cradleStandY, cradleStandZ);
-	glVertex3f(ball3X, ball3Y, ball3Z);
+	glVertex3f(ball3.ballX, ball3.ballY, ball3.ballZ);
 	glVertex3f(cradleStandX, cradleStandY, cradleStandZ);
-	glVertex3f(ball4X, ball4Y, ball4Z);
+	glVertex3f(ball4.ballX, ball4.ballY, ball4.ballZ);
 	glVertex3f(cradleStandX - 0.3, cradleStandY, cradleStandZ);
-	glVertex3f(ball5X, ball5Y, ball5Z);
+	glVertex3f(ball5.ballX, ball5.ballY, ball5.ballZ);
 	glVertex3f(cradleStandX - 0.6, cradleStandY, cradleStandZ);
 	glEnd();
 	glPopMatrix();
@@ -500,26 +469,10 @@ void display(void)
 	#pragma endregion
 
 	glFlush();
+	//glutSwapBuffers();
 }
 
 
-
-
-void checkCollisions()
-{
-	if (abs(ball1M) > 0) {
-		float distance = sqrt(((ball2X - ball1X) * (ball2X - ball1X)) + ((ball2Y - ball1Y) * (ball2Y - ball1Y)));
-		if (distance <= 0.3) 			{
-
-			// collision
-			if (ball2M > 0) {
-				float M = ball2M;
-				ball1M =M;
-			}
-		}
-	}
-
-}
 
 
 // Timer function for object animations
@@ -538,31 +491,47 @@ void animationTimer(int value)
 	}
 
 	// Newtons cradle
-	if (ball1E + ball2E + ball3E + ball4E + ball5E <= 0) {
-		if (dropped) {
-			// Reset balls
-			ball1E = m * g * (ball1Y - ball3Y);
-		}else if (ball1.ballAngle <= 45) {
+	acuMomentum += abs(ball1.ballAngle) + abs(ball2.ballAngle) + abs(ball3.ballAngle) + abs(ball4.ballAngle) + abs(ball5.ballAngle);
+	averageMomentum = acuMomentum * 100 / value;
+	if (value > 100) {
+		if (averageMomentum < 500.0 && dropped == true) {
+			ball1.resetBall();
+			ball2.resetBall();
+			ball3.resetBall();
+			ball4.resetBall();
+			ball5.resetBall();
+			dropped = false;
+			currentDrop ^= 1;
+		}
+		acuMomentum = 0;
+		value = 0;
+	}
+
+	if (!dropped) {
+		if (ball1.ballAngle <= 45) {
+			if (currentDrop == 1) {
+				ball2.ballAngle += 0.1;
+			}
 			ball1.ballAngle += 0.1;
-			ball2Angle += 0.1;
 
 			ball1.update();
-
-			ball1Y = (cradleStandY)+stringLength * -cos((ball1Angle * 3.1415 / 180));
+			ball2.update();
 		} else {
 			dropped = true;
-			ball1E = 3;
-			cout << ball1Y << endl;
 		}
 	} else {
-
+		//newtonsCradle.updateBalls(dt);
 		ball1.updatePosition(dt);
+		ball2.updatePosition(dt);
+		ball3.updatePosition(dt);
+		ball4.updatePosition(dt);
+		ball5.updatePosition(dt);
 
-
-		checkCollisions();
+		checkCollisions(&ball1, &ball2, &ball3, &ball4, &ball5);
 	}
 
 	glutPostRedisplay();
+	value++;
 	glutTimerFunc(animationTime, animationTimer, value);
 }
 
@@ -603,6 +572,15 @@ void initialize(void)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60, 1, 1.0, 1000.0);   //Camera Frustum
+
+
+	// Newtons cradle initialize
+	newtonsCradle.inset(ball1);
+	newtonsCradle.inset(ball2);
+	newtonsCradle.inset(ball3);
+	newtonsCradle.inset(ball4);
+	newtonsCradle.inset(ball5);
+	newtonsCradle.print();
 }
 
 
@@ -611,6 +589,7 @@ int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH);
+	//glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(720, 720);
 	glutInitWindowPosition(50, 50);
 	glutCreateWindow("Assignment 1");

@@ -21,31 +21,6 @@ int* nvMoire, * t1Moire, * t2Moire, * t3Moire, * t4Moire;		//number of vertices 
 int nvertMoire, nfaceMoire;					//total number of vertices and faces
 
 
-
-
-class cradleBalls {
-public:
-	vector<ball> cradleData;
-
-	cradleBalls()
-	{
-
-	}
-
-	void inset(ball data)
-	{
-		cradleData.push_back(data);
-	}
-
-	void updateBalls(float dt)
-	{
-		for (int i = 0; i < cradleData.size(); i++) {
-			cradleData[i].updatePosition(dt);
-		}
-	}
-};
-
-
 void loadObjects()
 {
 	loadAmesFile("AmesWindow.off");

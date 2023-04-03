@@ -9,10 +9,19 @@ TODO:
 		FPS counter
 	newtons cradle
 		shadows lecture notes 6
-		collisions
-		move to object based balls
 		animation sequence
+	Move spotlight to an object
 
+
+Extra features:
+	DONE planar shadow
+		Transparency
+	spot light on a moving/rotating object
+	DONE physics based animation						
+	texture stuff
+		A texture mapped sweep surface
+		A texture mapped triangle strip or quad strip that is not part of a sweep surface 
+		2 x texture mapped quad showing a static optical illusion
 
 p = mv
 E = 1/2 m * v ^ 2
